@@ -54,7 +54,8 @@ def load_models():
     vectorizer = EmbeddingVectorizer()
     return kmeans, cluster_to_label, id_to_label, vectorizer
 
-
+# GỌI NGAY SAU KHI ĐỊNH NGHĨA HÀM
+kmeans, cluster_to_label, id_to_label, vectorizer = load_models()
 # -------------------------------
 # Giao diện người dùng
 # -------------------------------
