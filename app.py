@@ -42,10 +42,18 @@ def load_models():
         cluster_to_label = pickle.load(f)
     with open('id_to_label.pkl', 'rb') as f:
         id_to_label = pickle.load(f)
+
+    # Force cluster centers to float32 to avoid buffer dtype mismatch
+    try:
+        if hasattr(kmeans, "cluster_centers_"):
+            kmeans.cluster_centers_ = np.asarray(kmeans.cluster_centers_, dtype=np.float32)
+    except Exception as e:
+        # fallback log; Streamlit sẽ in ra
+        st.warning(f"Warning when casting cluster_centers_: {e}")
+
     vectorizer = EmbeddingVectorizer()
     return kmeans, cluster_to_label, id_to_label, vectorizer
 
-kmeans, cluster_to_label, id_to_label, vectorizer = load_models()
 
 # -------------------------------
 # Giao diện người dùng
@@ -62,12 +70,15 @@ if st.button("Dự đoán"):
         # Tính embedding
         X_new = vectorizer.transform_numpy([user_input], mode='query')
 
-        # Dự đoán cụm
-        X_new = vectorizer.transform_numpy([user_input], mode='query')
-        X_new = X_new.astype(np.float32)
+        # Match dtype with cluster centers (most likely float32)
+        try:
+            X_new = np.asarray(X_new, dtype=kmeans.cluster_centers_.dtype)
+        except Exception:
+            X_new = np.asarray(X_new, dtype=np.float32)
+            kmeans.cluster_centers_ = np.asarray(kmeans.cluster_centers_, dtype=np.float32)
+
         cluster_id = kmeans.predict(X_new)[0]
 
-        # Gán nhãn
         label_id = cluster_to_label[cluster_id]
         label_name = id_to_label[label_id]
 
