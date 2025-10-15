@@ -63,6 +63,8 @@ if st.button("Dự đoán"):
         X_new = vectorizer.transform_numpy([user_input], mode='query')
 
         # Dự đoán cụm
+        X_new = vectorizer.transform_numpy([user_input], mode='query')
+        X_new = X_new.astype(np.float32)
         cluster_id = kmeans.predict(X_new)[0]
 
         # Gán nhãn
